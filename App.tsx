@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import type { Path, Point } from './types';
+import type { Path, Point, Star } from './types';
 import { COLORS, SOURCE_RADIUS, SOURCE_ID } from './constants';
 
 const generatePathData = (points: Point[], center: Point): string => {
@@ -14,6 +14,7 @@ const generatePathData = (points: Point[], center: Point): string => {
 
 const App: React.FC = () => {
   const [paths, setPaths] = useState<Path[]>([]);
+  const [stars, setStars] = useState<Star[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isDrawingAllowed, setIsDrawingAllowed] = useState(false);
   const [currentColorIndex, setCurrentColorIndex] = useState(3);
@@ -27,8 +28,19 @@ const App: React.FC = () => {
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     };
     window.addEventListener('resize', handleResize);
+    
+    const numStars = Math.floor((window.innerWidth * window.innerHeight) / 10000);
+    const generatedStars: Star[] = Array.from({ length: numStars }).map(() => ({
+      cx: Math.random() * window.innerWidth,
+      cy: Math.random() * window.innerHeight,
+      r: Math.random() * 1.5 + 0.5,
+      animationDuration: `${Math.random() * 5 + 3}s`,
+      animationDelay: `${Math.random() * 5}s`,
+    }));
+    setStars(generatedStars);
+    
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [windowSize.width, windowSize.height]);
 
   const getCoordinates = useCallback((event: React.MouseEvent | React.TouchEvent): Point | null => {
     if (!svgRef.current) return null;
@@ -68,7 +80,6 @@ const App: React.FC = () => {
     const dy = absolutePoint.y - center.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
     
-    // The point on the circumference of the orb, relative to the center
     let startPoint; 
     if (distance === 0) {
       startPoint = { x: 0, y: -SOURCE_RADIUS };
@@ -79,7 +90,6 @@ const App: React.FC = () => {
       };
     }
 
-    // The current cursor position, relative to the center
     const currentRelativePoint = {
       x: absolutePoint.x - center.x,
       y: absolutePoint.y - center.y
@@ -153,6 +163,22 @@ const App: React.FC = () => {
             </feMerge>
           </filter>
         </defs>
+
+        {/* Stars */}
+        {stars.map((star, i) => (
+          <circle
+            key={i}
+            cx={star.cx}
+            cy={star.cy}
+            r={star.r}
+            fill="white"
+            className="twinkle"
+            style={{
+              animationDuration: star.animationDuration,
+              animationDelay: star.animationDelay,
+            }}
+          />
+        ))}
 
         {/* Drawn Extensions */}
         {paths.map(path => {
