@@ -139,7 +139,6 @@ const App: React.FC = () => {
   };
 
   const center = { x: windowSize.width / 2, y: windowSize.height / 2 };
-  const currentColor = COLORS[currentColorIndex].hex;
 
   return (
     <div className="w-screen h-screen bg-gray-900 text-white select-none relative overflow-hidden">
@@ -204,9 +203,9 @@ const App: React.FC = () => {
           cx={center.x}
           cy={center.y}
           r={SOURCE_RADIUS}
-          fill={currentColor}
+          fill="white"
           className="cursor-pointer pulse-glow"
-          style={{ color: currentColor }}
+          style={{ color: 'white' }}
         />
       </svg>
       
